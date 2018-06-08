@@ -8,5 +8,5 @@ Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.ser
 Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
 Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
 Started LoggerTest in 2.565 seconds (JVM running for 3.707)
-info:lsm
+info:lsmFDA
 Closing org.springframework.web.context.support.GenericWebApplicationContext@4e0ae11f: startup date [Fri Jun 08 16:34:00 GMT+08:00 2018]; root of context hierarchy
