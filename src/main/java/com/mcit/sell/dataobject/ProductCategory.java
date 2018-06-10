@@ -1,8 +1,10 @@
 package com.mcit.sell.dataobject;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * 描述:
@@ -13,6 +15,8 @@ import javax.persistence.Id;
  * @create 2018-06-08 17:40
  */
 @Entity
+@DynamicUpdate//动态更新时间
+@Data//lombok省去get，set的方法
 public class ProductCategory {
     /**
      * 类目id
@@ -29,36 +33,20 @@ public class ProductCategory {
      */
     private Integer categoryType;
 
-    public Integer getCategoryId() {
-        return categoryId;
+    public ProductCategory() {
     }
 
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
+    /**
+     * 创建时间
+     */
+//    private Date createTime;
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
+    /**
+     * 更新时间
+     */
+//    private Date updateTime;
+    public ProductCategory(String categoryName, Integer categoryType) {
         this.categoryName = categoryName;
-    }
-
-    public void setCategoryType(Integer categoryType) {
         this.categoryType = categoryType;
-    }
-
-    public Integer getCategoryType() {
-        return categoryType;
-    }
-
-    @Override
-    public String toString() {
-        return "ProductCategory{" +
-                "categoryId=" + categoryId +
-                ", categoryName='" + categoryName + '\'' +
-                ", categoryType='" + categoryType + '\'' +
-                '}';
     }
 }
