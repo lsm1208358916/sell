@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 /**
  * 描述:
- *
+ *      商品控制器
  * @author lsm12
  * @create 2018-06-10 9:23
  */
