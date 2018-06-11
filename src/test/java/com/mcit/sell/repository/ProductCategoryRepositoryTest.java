@@ -45,10 +45,10 @@ public class ProductCategoryRepositoryTest {
      */
     @Test
     public void saveTest() {
-        /*ProductCategory productCategory = new ProductCategory();
+        ProductCategory productCategory = new ProductCategory();
         productCategory.setCategoryName("女生最爱");
         productCategory.setCategoryType(1);
-        repository.save(productCategory);*/
+        repository.save(productCategory);
     }
 
     /**
