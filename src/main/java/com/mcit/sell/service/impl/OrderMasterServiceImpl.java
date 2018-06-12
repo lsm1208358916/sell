@@ -1,5 +1,6 @@
 package com.mcit.sell.service.impl;
 
+import com.mcit.sell.converter.OrderMaster2OrderMasterDTO;
 import com.mcit.sell.dataobject.OrderDetail;
 import com.mcit.sell.dataobject.OrderMaster;
 import com.mcit.sell.dataobject.ProductInfo;
@@ -17,9 +18,11 @@ import com.mcit.sell.utils.KeyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -89,18 +92,27 @@ public class OrderMasterServiceImpl implements OrderMasterService {
     }
 
     @Override
-    public Page<OrderMasterDTO> findAllList(String buyerOpendId, Pageable pageable) {
-        return null;
+    public Page<OrderMasterDTO> findAllList(String buyerOpenid, Pageable pageable) {
+        Page<OrderMaster> orderMasterPage = orderMasterRepository.findByBuyerOpenid(buyerOpenid, pageable);
+        List<OrderMasterDTO> orderMasterDTOList = OrderMaster2OrderMasterDTO.converter(orderMasterPage.getContent());
+        Page<OrderMasterDTO> OrderMasterDTO = new PageImpl<>(orderMasterDTOList, pageable, orderMasterPage.getTotalElements());
+        return OrderMasterDTO;
     }
 
     @Override
-    public OrderMasterDTO findOne(String buyerOpendId) {
-        OrderMaster orderMaster = orderMasterRepository.findOne(buyerOpendId);
+    public OrderMasterDTO findOne(String orderId) {
+        OrderMaster orderMaster = orderMasterRepository.findOne(orderId);
         if (orderMaster == null) {
             throw new SellException(ResultEnum.ORDERMASTER_NOT_EXIST);
         }
         List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderMaster.getOrderId());
-        return null;
+        if (CollectionUtils.isEmpty(orderDetailList)) {
+            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        }
+        OrderMasterDTO orderMasterDTO = new OrderMasterDTO();
+        BeanUtils.copyProperties(orderMaster, orderMasterDTO);
+        orderMasterDTO.setOrderDetailList(orderDetailList);
+        return orderMasterDTO;
     }
 
     @Override

@@ -17,10 +17,10 @@ public interface OrderMasterService {
     OrderMasterDTO create(OrderMasterDTO orderMasterDTO);
 
     //查询所有订单列表
-    Page<OrderMasterDTO> findAllList(String buyerOpendId, Pageable pageable);
+    Page<OrderMasterDTO> findAllList(String orderId, Pageable pageable);
 
     //查询单个订单
-    OrderMasterDTO findOne(String buyerOpendId);
+    OrderMasterDTO findOne(String orderId);
 
     //取消订单
     OrderMasterDTO cancel(OrderMasterDTO orderMasterDTO);

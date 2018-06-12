@@ -4,6 +4,7 @@ import com.mcit.sell.dataobject.OrderDetail;
 import com.mcit.sell.dto.CartDTO;
 import com.mcit.sell.dto.OrderMasterDTO;
 import com.mcit.sell.service.OrderMasterService;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +52,13 @@ public class OrderMasterServiceImplTest {
 
     @Test
     public void findAllList() {
+
     }
 
     @Test
     public void findOne() {
+        OrderMasterDTO orderMasterDTO = orderMasterService.findOne("2");
+        Assert.assertNotNull(orderMasterDTO);
     }
 
     @Test
