@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 描述:
- *
+ *类目服务实现
  * @author lsm12
  * @create 2018-06-10 1:09
  */

@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * 描述:
+ * 商品api外层
  *
  * @author lsm12
  * @create 2018-06-10 10:47

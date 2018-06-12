@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 /**
  * 描述:
+ * 商品api内层
  *
  * @author lsm12
  * @create 2018-06-10 10:57

@@ -3,6 +3,7 @@ package com.mcit.sell.dto;
 import com.mcit.sell.dataobject.OrderDetail;
 import com.mcit.sell.enums.OrderStatusEnum;
 import com.mcit.sell.enums.PayStatusEnum;
+import lombok.Data;
 
 import javax.persistence.Id;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.util.List;
  * @author LSM
  * @create 2018-06-11 16:35
  */
+@Data
 public class OrderMasterDTO {
 
     private String orderId;//订单id
