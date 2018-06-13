@@ -15,6 +15,8 @@ import com.mcit.sell.repository.OrderMasterRepository;
 import com.mcit.sell.service.OrderMasterService;
 import com.mcit.sell.service.ProductInfoService;
 import com.mcit.sell.utils.KeyUtil;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  * @create 2018-06-12 9:40
  */
 @Service
+@Slf4j
 public class OrderMasterServiceImpl implements OrderMasterService {
     @Autowired
     ProductInfoService productInfoService;
@@ -116,17 +119,68 @@ public class OrderMasterServiceImpl implements OrderMasterService {
     }
 
     @Override
+    @Transactional
     public OrderMasterDTO cancel(OrderMasterDTO orderMasterDTO) {
-        return null;
+        //判断订单状态
+        if (!orderMasterDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())) {
+            log.error("【取消订单】订单状态不正确  orderMasterDTO={}", orderMasterDTO);
+            throw new SellException(ResultEnum.ORDERMASTER_STATUS_ERROR);
+        }
+
+        //修改订单状态
+        OrderMaster orderMaster = new OrderMaster();
+        orderMasterDTO.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
+        BeanUtils.copyProperties(orderMasterDTO, orderMaster);
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if (result == null) {
+            log.error("【取消订单】 订单状态更新失败  orderMaster={}", orderMaster);
+            throw new SellException(ResultEnum.ORDERMASTERSTATUS_UPDATE_ERROR);
+        }
+        //返还库存
+        List<CartDTO> cartDTOList = orderMasterDTO.getOrderDetailList().stream().map(e ->
+                new CartDTO(e.getProductId(), e.getProductQuantity())
+        ).collect(Collectors.toList());
+        productInfoService.increaseStock(cartDTOList);
+
+        //如果用户已经支付，退款
+        if (orderMasterDTO.getPayStatus().equals(PayStatusEnum.SUCCESS)) {
+            //TODO
+        }
+        return orderMasterDTO;
     }
 
     @Override
+    @Transactional
     public OrderMasterDTO finish(OrderMasterDTO orderMasterDTO) {
-        return null;
+        OrderMaster orderMaster = orderMasterRepository.findOne(orderMasterDTO.getOrderId());
+        orderMaster.setOrderStatus(OrderStatusEnum.FINISHED.getCode());//订单状态改为完结
+        orderMaster.setPayStatus(PayStatusEnum.SUCCESS.getCode());//支付状态改为支付
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+
+        //返回数据设置订单详情
+        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderMaster.getOrderId());
+        if (CollectionUtils.isEmpty(orderDetailList)) {
+            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        }
+        BeanUtils.copyProperties(orderMaster, orderMasterDTO);
+        orderMasterDTO.setOrderDetailList(orderDetailList);
+        return orderMasterDTO;
     }
 
     @Override
+    @Transactional
     public OrderMasterDTO paid(OrderMasterDTO orderMasterDTO) {
-        return null;
+        OrderMaster orderMaster = orderMasterRepository.findOne(orderMasterDTO.getOrderId());
+        orderMaster.setPayStatus(PayStatusEnum.SUCCESS.getCode());//支付状态改为支付
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+
+        //返回数据设置订单详情
+        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderMaster.getOrderId());
+        if (CollectionUtils.isEmpty(orderDetailList)) {
+            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        }
+        BeanUtils.copyProperties(orderMaster, orderMasterDTO);
+        orderMasterDTO.setOrderDetailList(orderDetailList);
+        return orderMasterDTO;
     }
 }

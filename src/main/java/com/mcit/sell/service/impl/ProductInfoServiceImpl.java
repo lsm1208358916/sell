@@ -7,6 +7,7 @@ import com.mcit.sell.enums.ResultEnum;
 import com.mcit.sell.exception.SellException;
 import com.mcit.sell.repository.ProductInfoRepository;
 import com.mcit.sell.service.ProductInfoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +19,13 @@ import java.util.List;
 
 /**
  * 描述:
- *商品信息实现
+ * 商品信息实现
+ *
  * @author lsm12
  * @create 2018-06-10 8:04
  */
 @Service
+@Slf4j
 public class ProductInfoServiceImpl implements ProductInfoService {
     @Autowired
     ProductInfoRepository repository;
@@ -53,8 +56,20 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     }
 
     @Override
+    @Transactional
     public void increaseStock(List<CartDTO> cartList) {
-
+        for (CartDTO cartDTO : cartList) {
+            ProductInfo productInfo = repository.findOne(cartDTO.getProductId());
+            if (productInfo == null) {
+                throw new SellException(ResultEnum.PRODUCT_NOT_EXIST);
+            }
+            Integer resultStock = productInfo.getProductStock() + cartDTO.getProductQuantity();
+            productInfo.setProductStock(resultStock);
+            ProductInfo result = repository.save(productInfo);
+            if (result == null) {
+                throw new SellException(ResultEnum.STOCK_UPDATE_ERROR);
+            }
+        }
     }
 
     @Override
@@ -70,7 +85,10 @@ public class ProductInfoServiceImpl implements ProductInfoService {
                 throw new SellException(ResultEnum.PRODUCT_STOCK_ERROR);
             }
             productInfo.setProductStock(resultStock);
-            repository.save(productInfo);
+            ProductInfo result = repository.save(productInfo);
+            if (result == null) {
+                throw new SellException(ResultEnum.STOCK_UPDATE_ERROR);
+            }
         }
     }
 }
