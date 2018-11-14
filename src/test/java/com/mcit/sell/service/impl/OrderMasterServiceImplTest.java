@@ -71,16 +71,22 @@ public class OrderMasterServiceImplTest {
 
     @Test
     public void cancel() {
-        OrderMasterDTO orderMasterDTO = orderMasterService.findOne("1528785854157234328");
+        OrderMasterDTO orderMasterDTO = orderMasterService.findOne("2");
         OrderMasterDTO result = orderMasterService.cancel(orderMasterDTO);
         Assert.assertEquals(OrderStatusEnum.CANCEL.getCode(), result.getOrderStatus());
     }
 
     @Test
     public void finish() {
+        OrderMasterDTO orderMasterDTO = orderMasterService.findOne("2");
+        OrderMasterDTO result = orderMasterService.finish(orderMasterDTO);
+        Assert.assertEquals(OrderStatusEnum.FINISHED.getCode(), result.getOrderStatus());
     }
 
     @Test
     public void paid() {
+        OrderMasterDTO orderMasterDTO = orderMasterService.findOne("2");
+        OrderMasterDTO result = orderMasterService.paid(orderMasterDTO);
+        Assert.assertEquals(PayStatusEnum.SUCCESS.getCode(), result.getPayStatus());
     }
 }

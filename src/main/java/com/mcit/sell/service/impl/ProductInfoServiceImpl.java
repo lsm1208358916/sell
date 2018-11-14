@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 public class ProductInfoServiceImpl implements ProductInfoService {
     @Autowired
-    ProductInfoRepository repository;
+    private ProductInfoRepository repository;
 
     @Override
     public ProductInfo findOne(String productInfoId) {

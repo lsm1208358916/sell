@@ -30,9 +30,9 @@ public interface ProductInfoService {
 
     ProductInfo save(ProductInfo productInfo);
 
-    //    加库存
+    // 加库存
     void increaseStock(List<CartDTO> cartList);
 
-    //    减库存
+    // 减库存
     void decreaseStock(List<CartDTO> cartList);
 }

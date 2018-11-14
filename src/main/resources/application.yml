@@ -7,8 +7,12 @@ spring:
   jpa:
     show-sql: true
     open-in-view: true
+  jackson:
+#    配置空属性不返回
+    default-property-inclusion: non_null
 server:
   context-path: /sell
+#配置日志格式
 #logging:
 #  pattern:
 #    console: "%d - %msg%m"

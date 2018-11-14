@@ -12,6 +12,7 @@ import com.mcit.sell.enums.ResultEnum;
 import com.mcit.sell.exception.SellException;
 import com.mcit.sell.repository.OrderDetailRepository;
 import com.mcit.sell.repository.OrderMasterRepository;
+import com.mcit.sell.service.BuyerService;
 import com.mcit.sell.service.OrderMasterService;
 import com.mcit.sell.service.ProductInfoService;
 import com.mcit.sell.utils.KeyUtil;
@@ -43,11 +44,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderMasterServiceImpl implements OrderMasterService {
     @Autowired
-    ProductInfoService productInfoService;
+    private ProductInfoService productInfoService;
     @Autowired
-    OrderDetailRepository orderDetailRepository;
+    private OrderDetailRepository orderDetailRepository;
     @Autowired
-    OrderMasterRepository orderMasterRepository;
+    private OrderMasterRepository orderMasterRepository;
 
     @Override
     @Transactional
@@ -77,8 +78,8 @@ public class OrderMasterServiceImpl implements OrderMasterService {
 
         //订单入库
         OrderMaster orderMaster = new OrderMaster();
+        orderMasterDTO.setOrderId(orderId);
         BeanUtils.copyProperties(orderMasterDTO, orderMaster);
-        orderMaster.setOrderId(orderId);
         orderMaster.setOrderAmount(orderAmount);
         orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());
         orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());
@@ -152,35 +153,44 @@ public class OrderMasterServiceImpl implements OrderMasterService {
     @Override
     @Transactional
     public OrderMasterDTO finish(OrderMasterDTO orderMasterDTO) {
-        OrderMaster orderMaster = orderMasterRepository.findOne(orderMasterDTO.getOrderId());
-        orderMaster.setOrderStatus(OrderStatusEnum.FINISHED.getCode());//订单状态改为完结
-        orderMaster.setPayStatus(PayStatusEnum.SUCCESS.getCode());//支付状态改为支付
-        OrderMaster result = orderMasterRepository.save(orderMaster);
-
-        //返回数据设置订单详情
-        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderMaster.getOrderId());
-        if (CollectionUtils.isEmpty(orderDetailList)) {
-            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        //判断状态
+        if (!orderMasterDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())) {
+            log.error("【完结订单】 订单状态更新失败  orderMasterDTO={}", orderMasterDTO);
+            throw new SellException(ResultEnum.ORDERMASTER_STATUS_ERROR);
         }
-        BeanUtils.copyProperties(orderMaster, orderMasterDTO);
-        orderMasterDTO.setOrderDetailList(orderDetailList);
+
+        //更改状态
+        OrderMaster orderMaster = new OrderMaster();
+        orderMasterDTO.setOrderStatus(OrderStatusEnum.FINISHED.getCode());//支付状态改为支付
+        BeanUtils.copyProperties(orderMasterDTO, orderMaster);
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if (result == null) {
+            log.error("【完结订单】 订单状态更新失败  orderMaster={}", orderMaster);
+            throw new SellException(ResultEnum.ORDERMASTERSTATUS_UPDATE_ERROR);
+        }
+        //返回数据设置订单详情
+
         return orderMasterDTO;
     }
 
     @Override
     @Transactional
     public OrderMasterDTO paid(OrderMasterDTO orderMasterDTO) {
-        OrderMaster orderMaster = orderMasterRepository.findOne(orderMasterDTO.getOrderId());
-        orderMaster.setPayStatus(PayStatusEnum.SUCCESS.getCode());//支付状态改为支付
-        OrderMaster result = orderMasterRepository.save(orderMaster);
 
-        //返回数据设置订单详情
-        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderMaster.getOrderId());
-        if (CollectionUtils.isEmpty(orderDetailList)) {
-            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        //判断状态
+        if (!orderMasterDTO.getPayStatus().equals(PayStatusEnum.WAIT.getCode())) {
+            log.error("【支付订单】 支付状态更新失败  orderMasterDTO={}", orderMasterDTO);
+            throw new SellException(ResultEnum.ORDERMASTER_STATUS_ERROR);
         }
-        BeanUtils.copyProperties(orderMaster, orderMasterDTO);
-        orderMasterDTO.setOrderDetailList(orderDetailList);
+        //修改支付状态
+        OrderMaster orderMaster = new OrderMaster();
+        orderMasterDTO.setPayStatus(PayStatusEnum.SUCCESS.getCode());//支付状态改为支付
+        BeanUtils.copyProperties(orderMasterDTO, orderMaster);
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if (result == null) {
+            log.error("【支付订单】 支付状态更新失败  orderMaster={}", orderMaster);
+            throw new SellException(ResultEnum.PAY_STATUS_ERROR);
+        }
         return orderMasterDTO;
     }
 }
